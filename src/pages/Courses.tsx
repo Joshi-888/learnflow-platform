@@ -67,6 +67,7 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
+      <Chatbot />
     </div>
   );
 }
