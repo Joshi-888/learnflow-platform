@@ -11,6 +11,7 @@ import LearnPage from "./pages/Learn";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import ProfilePage from "./pages/Profile";
+import BundlesPage from "./pages/Bundles";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,11 @@ const App = () => (
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/courses/:courseId" element={<CourseDetailPage />} />
           <Route path="/learn/:courseId/:videoId" element={<LearnPage />} />
+          <Route path="/bundles" element={<BundlesPage />} />
+          <Route path="/bundles/:bundleId" element={<BundlesPage />} />
+          <Route path="/categories" element={<CoursesPage />} />
+          <Route path="/certificates" element={<ProfilePage />} />
+          <Route path="/my-learning" element={<ProfilePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />

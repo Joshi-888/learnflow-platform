@@ -24,6 +24,21 @@ export interface Course {
   totalVideos: number;
   totalDuration: string;
   sections: Section[];
+  price: number;
+  originalPrice: number;
+  rating: number;
+  reviewCount: number;
+  badges: ("Premium" | "Bestseller" | "New" | "Hot")[];
+}
+
+export interface CourseBundle {
+  id: string;
+  title: string;
+  description: string;
+  courses: string[]; // course ids
+  price: number;
+  originalPrice: number;
+  badges: ("Premium" | "Bestseller" | "New")[];
 }
 
 export const courses: Course[] = [
@@ -36,11 +51,14 @@ export const courses: Course[] = [
     category: "Frontend",
     totalVideos: 8,
     totalDuration: "4h 30m",
+    price: 499,
+    originalPrice: 3099,
+    rating: 4.6,
+    reviewCount: 17636,
+    badges: ["Premium", "Bestseller"],
     sections: [
       {
-        id: "s1",
-        title: "Getting Started with React",
-        order: 1,
+        id: "s1", title: "Getting Started with React", order: 1,
         videos: [
           { id: "v1", title: "Introduction to React", youtubeId: "Tn6-PIqc4UM", duration: "12:30", durationSeconds: 750, order: 1 },
           { id: "v2", title: "Setting Up Your Environment", youtubeId: "Tn6-PIqc4UM", duration: "8:45", durationSeconds: 525, order: 2 },
@@ -48,9 +66,7 @@ export const courses: Course[] = [
         ],
       },
       {
-        id: "s2",
-        title: "Hooks & State Management",
-        order: 2,
+        id: "s2", title: "Hooks & State Management", order: 2,
         videos: [
           { id: "v4", title: "useState & useEffect", youtubeId: "Tn6-PIqc4UM", duration: "18:00", durationSeconds: 1080, order: 1 },
           { id: "v5", title: "useContext & useReducer", youtubeId: "Tn6-PIqc4UM", duration: "22:10", durationSeconds: 1330, order: 2 },
@@ -58,9 +74,7 @@ export const courses: Course[] = [
         ],
       },
       {
-        id: "s3",
-        title: "Advanced Patterns",
-        order: 3,
+        id: "s3", title: "Advanced Patterns", order: 3,
         videos: [
           { id: "v7", title: "Performance Optimization", youtubeId: "Tn6-PIqc4UM", duration: "20:00", durationSeconds: 1200, order: 1 },
           { id: "v8", title: "Testing React Applications", youtubeId: "Tn6-PIqc4UM", duration: "25:30", durationSeconds: 1530, order: 2 },
@@ -77,20 +91,21 @@ export const courses: Course[] = [
     category: "Backend",
     totalVideos: 7,
     totalDuration: "5h 15m",
+    price: 509,
+    originalPrice: 799,
+    rating: 4.4,
+    reviewCount: 2212,
+    badges: ["Premium", "Bestseller"],
     sections: [
       {
-        id: "s4",
-        title: "Node.js Fundamentals",
-        order: 1,
+        id: "s4", title: "Node.js Fundamentals", order: 1,
         videos: [
           { id: "v9", title: "Node.js Architecture", youtubeId: "Tn6-PIqc4UM", duration: "16:00", durationSeconds: 960, order: 1 },
           { id: "v10", title: "Modules & npm", youtubeId: "Tn6-PIqc4UM", duration: "12:30", durationSeconds: 750, order: 2 },
         ],
       },
       {
-        id: "s5",
-        title: "Express.js & REST APIs",
-        order: 2,
+        id: "s5", title: "Express.js & REST APIs", order: 2,
         videos: [
           { id: "v11", title: "Building REST APIs", youtubeId: "Tn6-PIqc4UM", duration: "24:00", durationSeconds: 1440, order: 1 },
           { id: "v12", title: "Middleware & Error Handling", youtubeId: "Tn6-PIqc4UM", duration: "18:45", durationSeconds: 1125, order: 2 },
@@ -98,9 +113,7 @@ export const courses: Course[] = [
         ],
       },
       {
-        id: "s6",
-        title: "Database & Deployment",
-        order: 3,
+        id: "s6", title: "Database & Deployment", order: 3,
         videos: [
           { id: "v14", title: "MySQL Integration", youtubeId: "Tn6-PIqc4UM", duration: "20:00", durationSeconds: 1200, order: 1 },
           { id: "v15", title: "Deployment to Production", youtubeId: "Tn6-PIqc4UM", duration: "15:30", durationSeconds: 930, order: 2 },
@@ -117,11 +130,14 @@ export const courses: Course[] = [
     category: "Languages",
     totalVideos: 6,
     totalDuration: "3h 45m",
+    price: 2499,
+    originalPrice: 4999,
+    rating: 4.3,
+    reviewCount: 522,
+    badges: ["Bestseller"],
     sections: [
       {
-        id: "s7",
-        title: "Type System Deep Dive",
-        order: 1,
+        id: "s7", title: "Type System Deep Dive", order: 1,
         videos: [
           { id: "v16", title: "Advanced Types", youtubeId: "Tn6-PIqc4UM", duration: "19:00", durationSeconds: 1140, order: 1 },
           { id: "v17", title: "Generics Mastery", youtubeId: "Tn6-PIqc4UM", duration: "23:00", durationSeconds: 1380, order: 2 },
@@ -129,9 +145,7 @@ export const courses: Course[] = [
         ],
       },
       {
-        id: "s8",
-        title: "Real-World Patterns",
-        order: 2,
+        id: "s8", title: "Real-World Patterns", order: 2,
         videos: [
           { id: "v19", title: "Type-Safe APIs", youtubeId: "Tn6-PIqc4UM", duration: "21:00", durationSeconds: 1260, order: 1 },
           { id: "v20", title: "Error Handling Patterns", youtubeId: "Tn6-PIqc4UM", duration: "14:00", durationSeconds: 840, order: 2 },
@@ -149,29 +163,28 @@ export const courses: Course[] = [
     category: "DevOps",
     totalVideos: 6,
     totalDuration: "4h 00m",
+    price: 459,
+    originalPrice: 799,
+    rating: 4.3,
+    reviewCount: 414,
+    badges: ["Premium"],
     sections: [
       {
-        id: "s9",
-        title: "Containerization",
-        order: 1,
+        id: "s9", title: "Containerization", order: 1,
         videos: [
           { id: "v22", title: "Docker Fundamentals", youtubeId: "Tn6-PIqc4UM", duration: "20:00", durationSeconds: 1200, order: 1 },
           { id: "v23", title: "Docker Compose", youtubeId: "Tn6-PIqc4UM", duration: "15:00", durationSeconds: 900, order: 2 },
         ],
       },
       {
-        id: "s10",
-        title: "CI/CD Pipelines",
-        order: 2,
+        id: "s10", title: "CI/CD Pipelines", order: 2,
         videos: [
           { id: "v24", title: "GitHub Actions", youtubeId: "Tn6-PIqc4UM", duration: "22:00", durationSeconds: 1320, order: 1 },
           { id: "v25", title: "Automated Testing", youtubeId: "Tn6-PIqc4UM", duration: "18:00", durationSeconds: 1080, order: 2 },
         ],
       },
       {
-        id: "s11",
-        title: "Cloud Deployment",
-        order: 3,
+        id: "s11", title: "Cloud Deployment", order: 3,
         videos: [
           { id: "v26", title: "Kubernetes Basics", youtubeId: "Tn6-PIqc4UM", duration: "25:00", durationSeconds: 1500, order: 1 },
           { id: "v27", title: "Production Monitoring", youtubeId: "Tn6-PIqc4UM", duration: "16:00", durationSeconds: 960, order: 2 },
@@ -188,20 +201,21 @@ export const courses: Course[] = [
     category: "Architecture",
     totalVideos: 5,
     totalDuration: "3h 20m",
+    price: 459,
+    originalPrice: 3199,
+    rating: 4.2,
+    reviewCount: 4038,
+    badges: ["Premium"],
     sections: [
       {
-        id: "s12",
-        title: "Fundamentals",
-        order: 1,
+        id: "s12", title: "Fundamentals", order: 1,
         videos: [
           { id: "v28", title: "Scalability Principles", youtubeId: "Tn6-PIqc4UM", duration: "22:00", durationSeconds: 1320, order: 1 },
           { id: "v29", title: "Load Balancing & Caching", youtubeId: "Tn6-PIqc4UM", duration: "19:00", durationSeconds: 1140, order: 2 },
         ],
       },
       {
-        id: "s13",
-        title: "Case Studies",
-        order: 2,
+        id: "s13", title: "Case Studies", order: 2,
         videos: [
           { id: "v30", title: "Design a URL Shortener", youtubeId: "Tn6-PIqc4UM", duration: "28:00", durationSeconds: 1680, order: 1 },
           { id: "v31", title: "Design a Chat System", youtubeId: "Tn6-PIqc4UM", duration: "30:00", durationSeconds: 1800, order: 2 },
@@ -219,34 +233,63 @@ export const courses: Course[] = [
     category: "Databases",
     totalVideos: 6,
     totalDuration: "3h 50m",
+    price: 509,
+    originalPrice: 3199,
+    rating: 4.5,
+    reviewCount: 6559,
+    badges: ["Bestseller", "Hot"],
     sections: [
       {
-        id: "s14",
-        title: "SQL Foundations",
-        order: 1,
+        id: "s14", title: "SQL Foundations", order: 1,
         videos: [
           { id: "v33", title: "SELECT, JOIN & Subqueries", youtubeId: "Tn6-PIqc4UM", duration: "20:00", durationSeconds: 1200, order: 1 },
           { id: "v34", title: "Aggregation & Window Functions", youtubeId: "Tn6-PIqc4UM", duration: "18:00", durationSeconds: 1080, order: 2 },
         ],
       },
       {
-        id: "s15",
-        title: "Schema Design",
-        order: 2,
+        id: "s15", title: "Schema Design", order: 2,
         videos: [
           { id: "v35", title: "Normalization", youtubeId: "Tn6-PIqc4UM", duration: "16:00", durationSeconds: 960, order: 1 },
           { id: "v36", title: "Indexing Strategies", youtubeId: "Tn6-PIqc4UM", duration: "22:00", durationSeconds: 1320, order: 2 },
         ],
       },
       {
-        id: "s16",
-        title: "Performance",
-        order: 3,
+        id: "s16", title: "Performance", order: 3,
         videos: [
           { id: "v37", title: "Query Optimization", youtubeId: "Tn6-PIqc4UM", duration: "24:00", durationSeconds: 1440, order: 1 },
           { id: "v38", title: "Transactions & Locking", youtubeId: "Tn6-PIqc4UM", duration: "19:00", durationSeconds: 1140, order: 2 },
         ],
       },
     ],
+  },
+];
+
+export const bundles: CourseBundle[] = [
+  {
+    id: "fullstack-bundle",
+    title: "Full Stack Web Development Bundle",
+    description: "Master frontend and backend development with React, Node.js, TypeScript, and SQL. Everything you need to become a full-stack engineer.",
+    courses: ["react-masterclass", "node-backend", "typescript-pro", "sql-mastery"],
+    price: 2999,
+    originalPrice: 12096,
+    badges: ["Premium", "Bestseller"],
+  },
+  {
+    id: "sde-bundle",
+    title: "Software Development Engineer Bundle",
+    description: "Comprehensive path covering system design, DevOps, TypeScript, and database mastery for aspiring software development engineers.",
+    courses: ["system-design", "devops-essentials", "typescript-pro", "sql-mastery"],
+    price: 2499,
+    originalPrice: 11196,
+    badges: ["Premium", "New"],
+  },
+  {
+    id: "cloud-bundle",
+    title: "Cloud & Infrastructure Bundle",
+    description: "Learn DevOps, system design, and backend development to master cloud-native application architecture and deployment.",
+    courses: ["devops-essentials", "system-design", "node-backend"],
+    price: 1299,
+    originalPrice: 4797,
+    badges: ["New"],
   },
 ];

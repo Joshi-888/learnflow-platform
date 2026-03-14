@@ -4,6 +4,7 @@ import { CourseCard } from "@/components/CourseCard";
 import { Navbar } from "@/components/Navbar";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Chatbot } from "@/components/Chatbot";
 
 const categories = ["All", ...Array.from(new Set(courses.map((c) => c.category)))];
 
@@ -66,6 +67,7 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
+      <Chatbot />
     </div>
   );
 }
