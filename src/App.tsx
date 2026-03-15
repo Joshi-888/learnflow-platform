@@ -12,6 +12,9 @@ import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import ProfilePage from "./pages/Profile";
 import BundlesPage from "./pages/Bundles";
+import OnboardingPage from "./pages/Onboarding";
+import CartPage from "./pages/Cart";
+import WishlistPage from "./pages/Wishlist";
 
 const queryClient = new QueryClient();
 
@@ -33,7 +36,10 @@ const App = () => (
           <Route path="/my-learning" element={<ProfilePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -17,7 +17,7 @@ export default function RegisterPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     register(name, email, password);
-    navigate("/courses");
+    navigate("/onboarding");
   };
 
   return (
