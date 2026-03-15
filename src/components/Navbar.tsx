@@ -1,18 +1,43 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
-import { BookOpen, LogOut, User, Package, GraduationCap, Award, Menu, X } from "lucide-react";
+import { useCartStore } from "@/stores/cartStore";
+import {
+  BookOpen, LogOut, User, Package, GraduationCap, Award, Menu, X,
+  ShoppingCart, Heart, Bell, Search, ChevronDown, Settings, CreditCard,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { useState, useRef, useEffect } from "react";
+
+const categories = [
+  "Development", "Business", "Finance & Accounting", "IT & Software",
+  "Office Productivity", "Personal Development", "Design", "Marketing",
+];
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore();
+  const { items, wishlist } = useCartStore();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
     logout();
+    setUserMenuOpen(false);
     navigate("/");
   };
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const navLinks = [
     { to: "/courses", label: "Courses", icon: BookOpen },
@@ -23,44 +48,135 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-primary">
-      <div className="container flex h-14 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-primary-foreground">
+      {/* Main nav */}
+      <div className="container flex h-14 items-center gap-4">
+        <Link to="/" className="flex items-center gap-2 text-primary-foreground shrink-0">
           <BookOpen className="h-6 w-6" />
-          <span className="font-heading text-lg font-bold tracking-tight">TechAcademy</span>
+          <span className="font-heading text-lg font-bold tracking-tight hidden sm:inline">TechAcademy</span>
         </Link>
 
+        {/* Search bar - desktop */}
+        <div className="relative hidden flex-1 max-w-md md:block">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search for anything"
+            className="h-9 bg-primary-foreground/10 border-primary-foreground/20 pl-9 text-primary-foreground placeholder:text-primary-foreground/50 focus:bg-primary-foreground/15"
+          />
+        </div>
+
         {/* Desktop Nav */}
-        <nav className="hidden items-center gap-4 md:flex">
+        <nav className="hidden items-center gap-3 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+              className="text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors whitespace-nowrap"
             >
               {link.label}
             </Link>
           ))}
+        </nav>
+
+        <div className="flex items-center gap-1 ml-auto">
+          {/* Mobile search toggle */}
+          <button
+            onClick={() => setSearchOpen(!searchOpen)}
+            className="text-primary-foreground/80 hover:text-primary-foreground p-2 md:hidden"
+          >
+            <Search className="h-5 w-5" />
+          </button>
 
           {isAuthenticated ? (
             <>
-              <Link to="/my-learning" className="text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              <Link to="/my-learning" className="hidden text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors lg:block whitespace-nowrap px-2">
                 My Learning
               </Link>
-              <Link to="/profile" className="flex items-center gap-1.5 text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                <User className="h-4 w-4" />
-                {user?.name}
+
+              {/* Wishlist */}
+              <Link to="/cart" className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Heart className="h-5 w-5" />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
+                    {wishlist.length}
+                  </span>
+                )}
               </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+
+              {/* Cart */}
+              <Link to="/cart" className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <ShoppingCart className="h-5 w-5" />
+                {items.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
+                    {items.length}
+                  </span>
+                )}
+              </Link>
+
+              {/* Notifications */}
+              <button className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Bell className="h-5 w-5" />
+              </button>
+
+              {/* User dropdown */}
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground hover:bg-accent/90 transition-colors"
+                >
+                  {user?.name?.charAt(0).toUpperCase()}
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border bg-popover shadow-lg">
+                    <div className="border-b p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground">
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-heading font-semibold text-popover-foreground truncate">{user?.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="py-1">
+                      {[
+                        { to: "/my-learning", label: "My Learning", icon: BookOpen },
+                        { to: "/cart", label: "My Cart", icon: ShoppingCart },
+                        { to: "/cart", label: "Wishlist", icon: Heart },
+                        { to: "/profile", label: "Profile", icon: User },
+                        { to: "/profile", label: "Account Settings", icon: Settings },
+                        { to: "/cart", label: "Payment Methods", icon: CreditCard },
+                      ].map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <Link
+                            key={item.label}
+                            to={item.to}
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-popover-foreground hover:bg-muted transition-colors"
+                          >
+                            <Icon className="h-4 w-4 text-muted-foreground" />
+                            {item.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    <div className="border-t py-1">
+                      <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-popover-foreground hover:bg-muted transition-colors"
+                      >
+                        <LogOut className="h-4 w-4 text-muted-foreground" />
+                        Log Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 md:flex">
               <Link to="/login">
                 <Button variant="ghost" size="sm" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
                   Sign In
@@ -73,21 +189,43 @@ export function Navbar() {
               </Link>
             </div>
           )}
-        </nav>
 
-        {/* Mobile Toggle */}
-        <button
-          className="text-primary-foreground md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+          {/* Mobile Toggle */}
+          <button className="text-primary-foreground p-2 md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile search */}
+      {searchOpen && (
+        <div className="border-t border-primary-foreground/10 bg-primary px-4 py-2 md:hidden">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Search for anything" className="h-9 bg-primary-foreground/10 border-primary-foreground/20 pl-9 text-primary-foreground placeholder:text-primary-foreground/50" />
+          </div>
+        </div>
+      )}
+
+      {/* Category bar */}
+      <div className="hidden border-t border-primary-foreground/10 bg-primary/95 md:block">
+        <div className="container flex gap-6 overflow-x-auto py-2 scrollbar-hide">
+          {categories.map((cat) => (
+            <Link
+              key={cat}
+              to="/courses"
+              className="whitespace-nowrap text-xs font-medium text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+            >
+              {cat}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Mobile Nav */}
       {mobileOpen && (
         <div className="border-t border-primary-foreground/10 bg-primary px-4 py-3 md:hidden">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
@@ -104,10 +242,13 @@ export function Navbar() {
             })}
             {isAuthenticated ? (
               <>
-                <Link to="/my-learning" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <Link to="/my-learning" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-primary-foreground/80 hover:bg-primary-foreground/10">
                   <BookOpen className="h-4 w-4" /> My Learning
                 </Link>
-                <Link to="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <Link to="/cart" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-primary-foreground/80 hover:bg-primary-foreground/10">
+                  <ShoppingCart className="h-4 w-4" /> Cart ({items.length})
+                </Link>
+                <Link to="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-primary-foreground/80 hover:bg-primary-foreground/10">
                   <User className="h-4 w-4" /> Profile
                 </Link>
               </>
