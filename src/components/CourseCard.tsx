@@ -92,6 +92,28 @@ export function CourseCard({ course }: CourseCardProps) {
             </div>
           )}
 
+          {/* Always visible Add to Cart button */}
+          {!enrolled && (
+            <button
+              onClick={handleAddToCart}
+              className={`mt-3 flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                inCart
+                  ? "bg-success text-success-foreground"
+                  : "bg-accent text-accent-foreground hover:bg-accent/90"
+              }`}
+            >
+              {inCart ? (
+                <>
+                  <Check className="h-4 w-4" /> Added to Cart
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-4 w-4" /> Add to Cart
+                </>
+              )}
+            </button>
+          )}
+
           {enrolled && (
             <div className="mt-3">
               <div className="mb-1 flex justify-between text-xs">

@@ -9,10 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useRef, useEffect } from "react";
 
-const categories = [
-  "Development", "Business", "Finance & Accounting", "IT & Software",
-  "Office Productivity", "Personal Development", "Design", "Marketing",
-];
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -207,20 +203,6 @@ export function Navbar() {
         </div>
       )}
 
-      {/* Category bar */}
-      <div className="hidden border-t border-primary-foreground/10 bg-primary/95 md:block">
-        <div className="container flex gap-6 overflow-x-auto py-2 scrollbar-hide">
-          {categories.map((cat) => (
-            <Link
-              key={cat}
-              to="/courses"
-              className="whitespace-nowrap text-xs font-medium text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-            >
-              {cat}
-            </Link>
-          ))}
-        </div>
-      </div>
 
       {/* Mobile Nav */}
       {mobileOpen && (
