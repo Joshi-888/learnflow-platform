@@ -9,10 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useRef, useEffect } from "react";
 
-const categories = [
-  "Development", "Business", "Finance & Accounting", "IT & Software",
-  "Office Productivity", "Personal Development", "Design", "Marketing",
-];
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore();
