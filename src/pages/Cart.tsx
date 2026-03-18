@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Chatbot } from "@/components/Chatbot";
 
 export default function CartPage() {
-  const { items, wishlist, removeFromCart, removeFromWishlist, moveToCart, getTotal, getSavings, clearCart } = useCartStore();
+  const { items, removeFromCart, getTotal, getSavings, clearCart } = useCartStore();
 
   return (
     <div className="min-h-screen bg-background">

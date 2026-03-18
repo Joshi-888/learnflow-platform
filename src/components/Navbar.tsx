@@ -139,7 +139,7 @@ export function Navbar() {
                       {[
                         { to: "/my-learning", label: "My Learning", icon: BookOpen },
                         { to: "/cart", label: "My Cart", icon: ShoppingCart },
-                        { to: "/cart", label: "Wishlist", icon: Heart },
+                        { to: "/wishlist", label: "Wishlist", icon: Heart },
                         { to: "/profile", label: "Profile", icon: User },
                         { to: "/profile", label: "Account Settings", icon: Settings },
                         { to: "/cart", label: "Payment Methods", icon: CreditCard },

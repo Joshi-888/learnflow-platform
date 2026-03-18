@@ -20,6 +20,8 @@ import thumbGraphql from "@/assets/thumb-graphql.jpg";
 import thumbNextjs from "@/assets/thumb-nextjs.jpg";
 import thumbDsa from "@/assets/thumb-dsa.jpg";
 
+export const getThumbnail = (id: string) => thumbnails[id] || "";
+
 export const thumbnails: Record<string, string> = {
   "react-masterclass": thumbReact,
   "node-backend": thumbNode,
