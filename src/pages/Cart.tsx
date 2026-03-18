@@ -3,7 +3,6 @@ import { useCartStore } from "@/stores/cartStore";
 import { Button } from "@/components/ui/button";
 import { Trash2, ShoppingCart, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { Chatbot } from "@/components/Chatbot";
 
 export default function CartPage() {
