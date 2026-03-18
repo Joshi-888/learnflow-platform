@@ -84,37 +84,6 @@ export default function CartPage() {
             </div>
           )}
         </div>
-
-        {/* Wishlist */}
-        {wishlist.length > 0 && (
-          <div className="mt-12">
-            <h2 className="mb-4 flex items-center gap-2 font-heading text-xl font-bold text-foreground">
-              <Heart className="h-5 w-5 text-accent" /> Wishlist ({wishlist.length})
-            </h2>
-            <div className="space-y-3">
-              {wishlist.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 rounded-lg border bg-card p-4">
-                  {item.thumbnail && (
-                    <img src={item.thumbnail} alt={item.title} className="h-16 w-24 rounded object-cover shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-card-foreground line-clamp-1">{item.title}</p>
-                    <p className="mt-0.5 font-heading font-bold text-foreground">₹{item.price.toLocaleString()}</p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <Button size="sm" variant="outline" onClick={() => moveToCart(item.id)}>
-                      <MoveRight className="mr-1 h-3 w-3" /> Move to Cart
-                    </Button>
-                    <button onClick={() => removeFromWishlist(item.id)} className="text-muted-foreground hover:text-destructive transition-colors">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
       <Chatbot />
     </div>
   );
