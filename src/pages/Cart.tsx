@@ -73,9 +73,11 @@ export default function CartPage() {
                   <span className="text-foreground">₹{getTotal().toLocaleString()}</span>
                 </div>
               </div>
-              <Button className="mt-4 w-full bg-accent text-accent-foreground hover:bg-accent/90">
-                Checkout
-              </Button>
+              <Link to="/checkout">
+                <Button className="mt-4 w-full bg-accent text-accent-foreground hover:bg-accent/90">
+                  Checkout
+                </Button>
+              </Link>
               <button onClick={clearCart} className="mt-2 w-full text-center text-xs text-muted-foreground hover:text-destructive transition-colors">
                 Clear cart
               </button>
