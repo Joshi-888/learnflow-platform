@@ -15,6 +15,9 @@ import BundlesPage from "./pages/Bundles";
 import OnboardingPage from "./pages/Onboarding";
 import CartPage from "./pages/Cart";
 import WishlistPage from "./pages/Wishlist";
+import CheckoutPage from "./pages/Checkout";
+import MyLearningPage from "./pages/MyLearning";
+import CertificatesPage from "./pages/Certificates";
 
 const queryClient = new QueryClient();
 
@@ -32,14 +35,15 @@ const App = () => (
           <Route path="/bundles" element={<BundlesPage />} />
           <Route path="/bundles/:bundleId" element={<BundlesPage />} />
           <Route path="/categories" element={<CoursesPage />} />
-          <Route path="/certificates" element={<ProfilePage />} />
-          <Route path="/my-learning" element={<ProfilePage />} />
+          <Route path="/certificates" element={<CertificatesPage />} />
+          <Route path="/my-learning" element={<MyLearningPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

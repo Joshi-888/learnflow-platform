@@ -89,7 +89,7 @@ export function Navbar() {
               </Link>
 
               {/* Wishlist */}
-              <Link to="/cart" className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              <Link to="/wishlist" className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
                 <Heart className="h-5 w-5" />
                 {wishlist.length > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
@@ -139,7 +139,7 @@ export function Navbar() {
                       {[
                         { to: "/my-learning", label: "My Learning", icon: BookOpen },
                         { to: "/cart", label: "My Cart", icon: ShoppingCart },
-                        { to: "/cart", label: "Wishlist", icon: Heart },
+                        { to: "/wishlist", label: "Wishlist", icon: Heart },
                         { to: "/profile", label: "Profile", icon: User },
                         { to: "/profile", label: "Account Settings", icon: Settings },
                         { to: "/cart", label: "Payment Methods", icon: CreditCard },
