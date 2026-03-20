@@ -31,7 +31,7 @@ const Index = () => {
               </Button>
             </Link>
             <Link to="/register">
-              <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
+              <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold">
                 Get Started Free
               </Button>
             </Link>

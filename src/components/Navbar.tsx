@@ -146,7 +146,7 @@ export function Navbar() {
                         { to: "/cart", label: "My Cart", icon: ShoppingCart },
                         { to: "/wishlist", label: "Wishlist", icon: Heart },
                         { to: "/profile", label: "Profile", icon: User },
-                        { to: "/profile", label: "Account Settings", icon: Settings },
+                        { to: "/account-settings", label: "Account Settings", icon: Settings },
                         { to: "/cart", label: "Payment Methods", icon: CreditCard },
                       ].map((item) => {
                         const Icon = item.icon;

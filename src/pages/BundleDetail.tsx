@@ -4,13 +4,14 @@ import { Chatbot } from "@/components/Chatbot";
 import { CourseCard } from "@/components/CourseCard";
 import { bundles, courses } from "@/data/courses";
 import { useCartStore } from "@/stores/cartStore";
+import { thumbnails } from "@/data/thumbnails";
 import { Button } from "@/components/ui/button";
 import { Package, PlayCircle, Clock, ShoppingCart, Check, ArrowLeft } from "lucide-react";
 
 export default function BundleDetailPage() {
   const { bundleId } = useParams();
   const bundle = bundles.find((b) => b.id === bundleId);
-  const { items, addItem } = useCartStore();
+  const { addToCart, isInCart } = useCartStore();
 
   if (!bundle) return <Navigate to="/bundles" replace />;
 
@@ -21,7 +22,20 @@ export default function BundleDetailPage() {
     return a + (match ? parseInt(match[1]) * 60 + (parseInt(match[2]) || 0) : 0);
   }, 0);
   const discount = Math.round((1 - bundle.price / bundle.originalPrice) * 100);
-  const isInCart = items.some((i) => i.courseId === bundle.id);
+  const inCart = isInCart(bundle.id);
+
+  const handleAddToCart = () => {
+    if (!inCart) {
+      addToCart({
+        id: bundle.id,
+        type: "bundle",
+        title: bundle.title,
+        price: bundle.price,
+        originalPrice: bundle.originalPrice,
+        thumbnail: thumbnails[bundle.id],
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,7 +46,6 @@ export default function BundleDetailPage() {
         </Link>
 
         <div className="mt-4 grid gap-8 lg:grid-cols-3">
-          {/* Main content */}
           <div className="lg:col-span-2">
             <div className="mb-2 flex items-center gap-2">
               <Package className="h-5 w-5 text-accent" />
@@ -55,14 +68,13 @@ export default function BundleDetailPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-20 rounded-lg border bg-card p-6 shadow-sm">
               <div className="flex items-baseline gap-2">
                 <span className="font-heading text-3xl font-bold text-foreground">₹{bundle.price.toLocaleString()}</span>
                 <span className="text-sm text-muted-foreground line-through">₹{bundle.originalPrice.toLocaleString()}</span>
               </div>
-              <span className="mt-1 inline-block text-sm font-semibold text-green-600">{discount}% off</span>
+              <span className="mt-1 inline-block text-sm font-semibold text-accent">{discount}% off</span>
 
               <div className="mt-2 text-xs text-muted-foreground">
                 You save ₹{(bundle.originalPrice - bundle.price).toLocaleString()} compared to buying individually
@@ -70,10 +82,10 @@ export default function BundleDetailPage() {
 
               <Button
                 className="mt-4 w-full bg-accent text-accent-foreground hover:bg-accent/90"
-                onClick={() => !isInCart && addItem(bundle.id)}
-                disabled={isInCart}
+                onClick={handleAddToCart}
+                disabled={inCart}
               >
-                {isInCart ? (
+                {inCart ? (
                   <><Check className="mr-2 h-4 w-4" /> Added to Cart</>
                 ) : (
                   <><ShoppingCart className="mr-2 h-4 w-4" /> Add Bundle to Cart</>
