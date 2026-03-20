@@ -109,9 +109,14 @@ export function Navbar() {
               </Link>
 
               {/* Notifications */}
-              <button className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                <Bell className="h-5 w-5" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => toast.info("No new notifications")}
+                  className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  <Bell className="h-5 w-5" />
+                </button>
+              </div>
 
               {/* User dropdown */}
               <div className="relative" ref={userMenuRef}>
