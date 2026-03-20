@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 
 
 export function Navbar() {
@@ -109,9 +110,14 @@ export function Navbar() {
               </Link>
 
               {/* Notifications */}
-              <button className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                <Bell className="h-5 w-5" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => toast.info("No new notifications")}
+                  className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  <Bell className="h-5 w-5" />
+                </button>
+              </div>
 
               {/* User dropdown */}
               <div className="relative" ref={userMenuRef}>
@@ -141,7 +147,7 @@ export function Navbar() {
                         { to: "/cart", label: "My Cart", icon: ShoppingCart },
                         { to: "/wishlist", label: "Wishlist", icon: Heart },
                         { to: "/profile", label: "Profile", icon: User },
-                        { to: "/profile", label: "Account Settings", icon: Settings },
+                        { to: "/account-settings", label: "Account Settings", icon: Settings },
                         { to: "/cart", label: "Payment Methods", icon: CreditCard },
                       ].map((item) => {
                         const Icon = item.icon;
