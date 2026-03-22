@@ -38,7 +38,7 @@ const App = () => (
           <Route path="/bundles" element={<BundlesPage />} />
           <Route path="/bundles/:bundleId" element={<BundleDetailPage />} />
           <Route path="/account-settings" element={<AccountSettingsPage />} />
-          <Route path="/categories" element={<CoursesPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/certificates" element={<CertificatesPage />} />
           <Route path="/my-learning" element={<MyLearningPage />} />
           <Route path="/login" element={<LoginPage />} />
