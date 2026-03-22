@@ -20,6 +20,7 @@ import MyLearningPage from "./pages/MyLearning";
 import CertificatesPage from "./pages/Certificates";
 import BundleDetailPage from "./pages/BundleDetail";
 import AccountSettingsPage from "./pages/AccountSettings";
+import CategoriesPage from "./pages/Categories";
 
 const queryClient = new QueryClient();
 
