@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { courses } from "@/data/courses";
 import { CourseCard } from "@/components/CourseCard";
 import { Navbar } from "@/components/Navbar";
@@ -6,16 +7,15 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Chatbot } from "@/components/Chatbot";
 
-const categories = ["All", ...Array.from(new Set(courses.map((c) => c.category)))];
-
 export default function CoursesPage() {
+  const [searchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get("category");
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
 
   const filtered = courses.filter((c) => {
     const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase()) ||
       c.instructor.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = activeCategory === "All" || c.category === activeCategory;
+    const matchesCategory = !categoryFromUrl || c.category === categoryFromUrl;
     return matchesSearch && matchesCategory;
   });
 
@@ -24,11 +24,17 @@ export default function CoursesPage() {
       <Navbar />
       <div className="container py-8">
         <div className="mb-8">
-          <h1 className="font-heading text-3xl font-bold text-foreground">Explore Courses</h1>
-          <p className="mt-1 text-muted-foreground">Build your skills with industry-grade content</p>
+          <h1 className="font-heading text-3xl font-bold text-foreground">
+            {categoryFromUrl ? `${categoryFromUrl} Courses` : "Explore Courses"}
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            {categoryFromUrl
+              ? `Browse all courses in ${categoryFromUrl}`
+              : "Build your skills with industry-grade content"}
+          </p>
         </div>
 
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6">
           <div className="relative max-w-xs">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -37,21 +43,6 @@ export default function CoursesPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  activeCategory === cat
-                    ? "bg-accent text-accent-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
           </div>
         </div>
 
