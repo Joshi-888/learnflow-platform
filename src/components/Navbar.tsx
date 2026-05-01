@@ -3,25 +3,27 @@ import { useAuthStore } from "@/stores/authStore";
 import { useCartStore } from "@/stores/cartStore";
 import {
   BookOpen, LogOut, User, Package, GraduationCap, Award, Menu, X,
-  ShoppingCart, Heart, Bell, Search, ChevronDown, Settings, CreditCard,
+  ShoppingCart, Heart, Bell, Search, Settings, CreditCard, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 
 export function Navbar() {
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, isAdmin, logout } = useAuthStore();
   const { items, wishlist } = useCartStore();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setUserMenuOpen(false);
     navigate("/");
   };
@@ -35,6 +37,37 @@ export function Navbar() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Admin: subscribe to pending payments count
+  useEffect(() => {
+    if (!isAdmin) {
+      setPendingCount(0);
+      return;
+    }
+    const refresh = async () => {
+      const { count } = await supabase
+        .from("payments")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending");
+      setPendingCount(count ?? 0);
+    };
+    refresh();
+    const channel = supabase
+      .channel("nav-pending-payments")
+      .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, (payload) => {
+        refresh();
+        if (payload.eventType === "INSERT") {
+          const p = payload.new as { user_name?: string; user_email?: string; amount?: number };
+          toast.info(`💰 New payment from ${p.user_name || p.user_email} – ₹${Number(p.amount).toLocaleString()}`, {
+            action: { label: "Review", onClick: () => navigate("/admin") },
+          });
+        }
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, navigate]);
 
   const navLinks = [
     { to: "/courses", label: "Courses", icon: BookOpen },
