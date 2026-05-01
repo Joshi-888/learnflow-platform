@@ -90,7 +90,7 @@ export default function MyLearningPage() {
             <h2 className="font-heading text-xl font-bold text-foreground mb-4">Recommended for You</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {allCourses
-                .filter((c) => !enrolledCourses.includes(c.id))
+                .filter((c) => !enrolledIds.includes(c.id))
                 .slice(0, 3)
                 .map((course) => (
                   <Link key={course.id} to={`/courses/${course.id}`} className="rounded-lg border bg-card p-4 hover:shadow-md transition-shadow">
