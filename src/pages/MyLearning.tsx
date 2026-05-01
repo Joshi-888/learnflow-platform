@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { useProgressStore } from "@/stores/progressStore";
 import { courses } from "@/data/courses";
@@ -8,14 +9,28 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Chatbot } from "@/components/Chatbot";
 import { getThumbnail } from "@/data/thumbnails";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MyLearningPage() {
-  const { isAuthenticated } = useAuthStore();
-  const { enrolledCourses, getCourseProgress } = useProgressStore();
+  const { isAuthenticated, user, initialized } = useAuthStore();
+  const { enrolledCourses: localEnrolled, getCourseProgress } = useProgressStore();
+  const [dbEnrolled, setDbEnrolled] = useState<string[]>([]);
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("enrollments")
+      .select("course_id")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        if (data) setDbEnrolled(data.map((e) => e.course_id));
+      });
+  }, [user]);
 
-  const enrolled = courses.filter((c) => enrolledCourses.includes(c.id));
+  if (initialized && !isAuthenticated) return <Navigate to="/login" replace />;
+
+  const enrolledIds = Array.from(new Set([...localEnrolled, ...dbEnrolled]));
+  const enrolled = courses.filter((c) => enrolledIds.includes(c.id));
   const allCourses = courses;
 
   return (
@@ -75,7 +90,7 @@ export default function MyLearningPage() {
             <h2 className="font-heading text-xl font-bold text-foreground mb-4">Recommended for You</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {allCourses
-                .filter((c) => !enrolledCourses.includes(c.id))
+                .filter((c) => !enrolledIds.includes(c.id))
                 .slice(0, 3)
                 .map((course) => (
                   <Link key={course.id} to={`/courses/${course.id}`} className="rounded-lg border bg-card p-4 hover:shadow-md transition-shadow">
