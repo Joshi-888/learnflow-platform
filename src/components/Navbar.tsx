@@ -142,13 +142,25 @@ export function Navbar() {
                 )}
               </Link>
 
-              {/* Notifications */}
+              {/* Notifications / Admin payments */}
               <div className="relative">
                 <button
-                  onClick={() => toast.info("No new notifications")}
+                  onClick={() => {
+                    if (isAdmin) {
+                      navigate("/admin");
+                    } else {
+                      toast.info("No new notifications");
+                    }
+                  }}
                   className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                  title={isAdmin ? "Pending payments" : "Notifications"}
                 >
                   <Bell className="h-5 w-5" />
+                  {isAdmin && pendingCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                      {pendingCount}
+                    </span>
+                  )}
                 </button>
               </div>
 
