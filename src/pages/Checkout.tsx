@@ -1,41 +1,63 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { useCartStore } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CreditCard, Smartphone, CheckCircle, ArrowLeft, ShieldCheck } from "lucide-react";
+import { CreditCard, Smartphone, CheckCircle, ArrowLeft, ShieldCheck, Clock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Chatbot } from "@/components/Chatbot";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type PaymentMethod = "card" | "upi" | "phonepe" | "googlepay" | "paytm" | null;
 
 export default function CheckoutPage() {
   const { items, getTotal, getSavings, clearCart } = useCartStore();
+  const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(null);
   const [processing, setProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const handlePay = () => {
+  const handlePay = async () => {
     if (!selectedMethod) return;
+    if (!isAuthenticated || !user) {
+      toast.error("Please sign in to checkout");
+      navigate("/login");
+      return;
+    }
     setProcessing(true);
-    setTimeout(() => {
-      setProcessing(false);
-      setSuccess(true);
-      clearCart();
-    }, 2000);
+    const { error } = await supabase.from("payments").insert({
+      user_id: user.id,
+      user_email: user.email,
+      user_name: user.name,
+      items: items.map((i) => ({ id: i.id, type: i.type, title: i.title, price: i.price })),
+      amount: getTotal(),
+      payment_method: selectedMethod,
+      status: "pending",
+    });
+    setProcessing(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setSubmitted(true);
+    clearCart();
   };
 
-  if (success) {
+  if (submitted) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container flex flex-col items-center justify-center py-20 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10">
-            <CheckCircle className="h-10 w-10 text-success" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning/10">
+            <Clock className="h-10 w-10 text-warning" />
           </div>
-          <h1 className="mt-6 font-heading text-3xl font-bold text-foreground">Payment Successful!</h1>
-          <p className="mt-2 text-muted-foreground">Your courses are now available in My Learning</p>
+          <h1 className="mt-6 font-heading text-3xl font-bold text-foreground">Payment Submitted!</h1>
+          <p className="mt-2 max-w-md text-muted-foreground">
+            Your payment is awaiting admin authorization. Once approved, your courses will appear in My Learning.
+          </p>
           <div className="mt-6 flex gap-3">
             <Link to="/my-learning">
               <Button className="bg-accent text-accent-foreground hover:bg-accent/90">Go to My Learning</Button>
@@ -83,7 +105,6 @@ export default function CheckoutPage() {
         <h1 className="font-heading text-3xl font-bold text-foreground">Checkout</h1>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-3">
-          {/* Payment Methods */}
           <div className="lg:col-span-2 space-y-6">
             <div className="rounded-lg border bg-card p-6">
               <h2 className="font-heading text-lg font-semibold text-card-foreground mb-4">Select Payment Method</h2>
@@ -110,7 +131,6 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Card form */}
             {selectedMethod === "card" && (
               <div className="rounded-lg border bg-card p-6 space-y-4">
                 <h3 className="font-heading font-semibold text-card-foreground">Card Details</h3>
@@ -123,7 +143,6 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* UPI form */}
             {selectedMethod === "upi" && (
               <div className="rounded-lg border bg-card p-6 space-y-4">
                 <h3 className="font-heading font-semibold text-card-foreground">Enter UPI ID</h3>
@@ -131,18 +150,21 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Wallet methods */}
             {(selectedMethod === "googlepay" || selectedMethod === "phonepe" || selectedMethod === "paytm") && (
               <div className="rounded-lg border bg-card p-6">
                 <p className="text-sm text-muted-foreground">
-                  You will be redirected to <span className="font-semibold text-card-foreground">{paymentMethods.find(m => m.id === selectedMethod)?.label}</span> to complete your payment of{" "}
+                  You will complete payment via <span className="font-semibold text-card-foreground">{paymentMethods.find(m => m.id === selectedMethod)?.label}</span> for{" "}
                   <span className="font-bold text-foreground">₹{getTotal().toLocaleString()}</span>
                 </p>
               </div>
             )}
+
+            <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm text-foreground">
+              <p className="font-semibold flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-warning" /> Admin Authorization Required</p>
+              <p className="mt-1 text-muted-foreground">After submission, an admin will review and authorize your payment. Course access is granted upon approval.</p>
+            </div>
           </div>
 
-          {/* Order Summary */}
           <div className="rounded-lg border bg-card p-6 h-fit space-y-4">
             <h2 className="font-heading text-lg font-semibold text-card-foreground">Order Summary</h2>
             <div className="space-y-2 text-sm">
@@ -172,10 +194,10 @@ export default function CheckoutPage() {
               disabled={!selectedMethod || processing}
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
             >
-              {processing ? "Processing..." : `Pay ₹${getTotal().toLocaleString()}`}
+              {processing ? "Submitting..." : `Submit Payment ₹${getTotal().toLocaleString()}`}
             </Button>
             <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-              <ShieldCheck className="h-3 w-3" /> Secure payment · 30-day refund
+              <ShieldCheck className="h-3 w-3" /> Secure · Admin authorization required
             </div>
           </div>
         </div>
