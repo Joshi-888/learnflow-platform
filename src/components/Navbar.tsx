@@ -188,6 +188,7 @@ export function Navbar() {
                     </div>
                     <div className="py-1">
                       {[
+                        ...(isAdmin ? [{ to: "/admin", label: `Admin · Payments${pendingCount > 0 ? ` (${pendingCount})` : ""}`, icon: ShieldCheck }] : []),
                         { to: "/my-learning", label: "My Learning", icon: BookOpen },
                         { to: "/cart", label: "My Cart", icon: ShoppingCart },
                         { to: "/wishlist", label: "Wishlist", icon: Heart },
