@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useAuthStore } from "@/stores/authStore";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CoursesPage from "./pages/Courses";
@@ -21,8 +23,18 @@ import CertificatesPage from "./pages/Certificates";
 import BundleDetailPage from "./pages/BundleDetail";
 import AccountSettingsPage from "./pages/AccountSettings";
 import CategoriesPage from "./pages/Categories";
+import AdminPage from "./pages/Admin";
 
 const queryClient = new QueryClient();
+
+const AuthInit = () => {
+  const init = useAuthStore((s) => s.init);
+  useEffect(() => {
+    const cleanup = init();
+    return cleanup;
+  }, [init]);
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -30,6 +42,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AuthInit />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/courses" element={<CoursesPage />} />
@@ -48,6 +61,7 @@ const App = () => (
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
