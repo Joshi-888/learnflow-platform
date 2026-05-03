@@ -171,6 +171,27 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-primary">
+      {isAuthenticated && isAdmin && pendingCount > 0 && (
+        <div className="border-b border-warning/30 bg-warning px-4 py-2 text-warning-foreground">
+          <div className="container flex flex-wrap items-center justify-between gap-2 text-sm">
+            <button
+              type="button"
+              onClick={() => setNotifOpen(true)}
+              className="min-w-0 text-left font-semibold hover:underline"
+            >
+              {pendingCount} payment{pendingCount === 1 ? "" : "s"} waiting: {formatPaymentMessage(pending[0])}
+            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button size="sm" variant="outline" className="h-7 border-warning-foreground/30 bg-transparent text-warning-foreground hover:bg-warning-foreground/10" onClick={() => navigate("/admin")}>
+                View all
+              </Button>
+              <Button size="sm" className="h-7 bg-success text-success-foreground hover:bg-success/90" onClick={() => handleAuthorize(pending[0])}>
+                Authorize latest
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Main nav */}
       <div className="container flex h-14 items-center gap-4">
         <Link to="/" className="flex items-center gap-2 text-primary-foreground shrink-0">
