@@ -24,6 +24,19 @@ interface PendingPayment {
   created_at: string;
 }
 
+const formatPaymentUser = (payment: PendingPayment) =>
+  payment.user_name || payment.user_email || "Unknown user";
+
+const formatPaymentCourses = (payment: PendingPayment) => {
+  const titles = (payment.items || []).map((item) => item.title).filter(Boolean);
+  if (titles.length === 0) return "selected course";
+  if (titles.length <= 2) return titles.join(", ");
+  return `${titles.slice(0, 2).join(", ")} +${titles.length - 2} more`;
+};
+
+const formatPaymentMessage = (payment: PendingPayment) =>
+  `${formatPaymentUser(payment)} paid ₹${Number(payment.amount).toLocaleString()} for ${formatPaymentCourses(payment)}`;
+
 export function Navbar() {
   const { isAuthenticated, user, isAdmin, logout } = useAuthStore();
   const { items, wishlist } = useCartStore();
@@ -36,6 +49,8 @@ export function Navbar() {
   const pendingCount = pending.length;
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const seenPaymentIdsRef = useRef<Set<string>>(new Set());
+  const initialPaymentLoadRef = useRef(true);
 
   const handleLogout = async () => {
     await logout();
@@ -60,32 +75,57 @@ export function Navbar() {
   useEffect(() => {
     if (!isAdmin) {
       setPending([]);
+      seenPaymentIdsRef.current = new Set();
+      initialPaymentLoadRef.current = true;
       return;
     }
     const refresh = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("payments")
         .select("*")
         .eq("status", "pending")
         .order("created_at", { ascending: false });
-      setPending((data ?? []) as unknown as PendingPayment[]);
+      if (error) {
+        toast.error(`Could not load payment notifications: ${error.message}`);
+        return;
+      }
+
+      const payments = (data ?? []) as unknown as PendingPayment[];
+      const previousSeen = seenPaymentIdsRef.current;
+      const newPayments = payments.filter((payment) => !previousSeen.has(payment.id));
+      seenPaymentIdsRef.current = new Set(payments.map((payment) => payment.id));
+      setPending(payments);
+
+      if (initialPaymentLoadRef.current) {
+        initialPaymentLoadRef.current = false;
+        if (payments.length > 0) {
+          toast.info(`${payments.length} pending payment${payments.length === 1 ? "" : "s"} need authorization`, {
+            description: formatPaymentMessage(payments[0]),
+            action: { label: "Open", onClick: () => setNotifOpen(true) },
+            duration: 10000,
+          });
+        }
+        return;
+      }
+
+      newPayments.forEach((payment) => {
+        toast.info("New payment received", {
+          description: formatPaymentMessage(payment),
+          action: { label: "Authorize", onClick: () => setNotifOpen(true) },
+          duration: 12000,
+        });
+      });
     };
     refresh();
+    const interval = window.setInterval(refresh, 5000);
     const channel = supabase
       .channel("nav-pending-payments")
       .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, (payload) => {
         refresh();
-        if (payload.eventType === "INSERT") {
-          const p = payload.new as PendingPayment;
-          const titles = (p.items || []).map((i) => i.title).join(", ");
-          toast.info(
-            `💰 ${p.user_name || p.user_email} paid ₹${Number(p.amount).toLocaleString()} for ${titles}`,
-            { action: { label: "Review", onClick: () => setNotifOpen(true) }, duration: 8000 }
-          );
-        }
       })
       .subscribe();
     return () => {
+      window.clearInterval(interval);
       supabase.removeChannel(channel);
     };
   }, [isAdmin]);
@@ -123,6 +163,27 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-primary">
+      {isAuthenticated && isAdmin && pendingCount > 0 && (
+        <div className="border-b border-warning/30 bg-warning px-4 py-2 text-warning-foreground">
+          <div className="container flex flex-wrap items-center justify-between gap-2 text-sm">
+            <button
+              type="button"
+              onClick={() => setNotifOpen(true)}
+              className="min-w-0 text-left font-semibold hover:underline"
+            >
+              {pendingCount} payment{pendingCount === 1 ? "" : "s"} waiting: {formatPaymentMessage(pending[0])}
+            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button size="sm" variant="outline" className="h-7 border-warning-foreground/30 bg-transparent text-warning-foreground hover:bg-warning-foreground/10" onClick={() => navigate("/admin")}>
+                View all
+              </Button>
+              <Button size="sm" className="h-7 bg-success text-success-foreground hover:bg-success/90" onClick={() => handleAuthorize(pending[0])}>
+                Authorize latest
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Main nav */}
       <div className="container flex h-14 items-center gap-4">
         <Link to="/" className="flex items-center gap-2 text-primary-foreground shrink-0">
