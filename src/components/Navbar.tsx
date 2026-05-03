@@ -188,11 +188,11 @@ export function Navbar() {
               </Link>
 
               {/* Notifications / Admin payments */}
-              <div className="relative">
+              <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => {
                     if (isAdmin) {
-                      navigate("/admin");
+                      setNotifOpen((o) => !o);
                     } else {
                       toast.info("No new notifications");
                     }
@@ -207,7 +207,76 @@ export function Navbar() {
                     </span>
                   )}
                 </button>
+
+                {isAdmin && notifOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-[min(92vw,420px)] rounded-lg border bg-popover shadow-lg z-50">
+                    <div className="flex items-center justify-between border-b px-4 py-3">
+                      <div>
+                        <p className="font-heading text-sm font-semibold text-popover-foreground">Payment Notifications</p>
+                        <p className="text-xs text-muted-foreground">{pendingCount} pending {pendingCount === 1 ? "payment" : "payments"}</p>
+                      </div>
+                      <Link
+                        to="/admin"
+                        onClick={() => setNotifOpen(false)}
+                        className="text-xs font-medium text-accent hover:underline"
+                      >
+                        View all
+                      </Link>
+                    </div>
+                    <div className="max-h-[420px] overflow-y-auto">
+                      {pending.length === 0 ? (
+                        <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                          No pending payments
+                        </div>
+                      ) : (
+                        pending.map((p) => (
+                          <div key={p.id} className="border-b last:border-b-0 px-4 py-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold text-popover-foreground truncate">
+                                  {p.user_name || "Unknown"}
+                                </p>
+                                <p className="text-xs text-muted-foreground truncate">{p.user_email}</p>
+                              </div>
+                              <p className="text-sm font-bold text-foreground shrink-0">
+                                ₹{Number(p.amount).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="mt-2 rounded-md bg-muted/50 p-2 space-y-0.5">
+                              {(p.items || []).map((it, idx) => (
+                                <p key={idx} className="text-xs text-popover-foreground line-clamp-1">
+                                  • {it.title}
+                                </p>
+                              ))}
+                            </div>
+                            <p className="mt-1.5 text-[10px] text-muted-foreground">
+                              {new Date(p.created_at).toLocaleString()} · {p.payment_method}
+                            </p>
+                            <div className="mt-2 flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 flex-1 text-xs"
+                                onClick={() => handleReject(p)}
+                              >
+                                Reject
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="h-7 flex-1 bg-success text-success-foreground hover:bg-success/90 text-xs"
+                                onClick={() => handleAuthorize(p)}
+                              >
+                                Authorize
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
+
 
               {/* User dropdown */}
               <div className="relative" ref={userMenuRef}>
