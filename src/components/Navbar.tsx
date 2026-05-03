@@ -12,6 +12,18 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 
+interface PendingPayment {
+  id: string;
+  user_id: string;
+  user_email: string | null;
+  user_name: string | null;
+  items: Array<{ id: string; type: string; title: string; price: number }>;
+  amount: number;
+  payment_method: string;
+  status: string;
+  created_at: string;
+}
+
 export function Navbar() {
   const { isAuthenticated, user, isAdmin, logout } = useAuthStore();
   const { items, wishlist } = useCartStore();
@@ -19,8 +31,11 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [pendingCount, setPendingCount] = useState(0);
+  const [pending, setPending] = useState<PendingPayment[]>([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const pendingCount = pending.length;
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     await logout();
