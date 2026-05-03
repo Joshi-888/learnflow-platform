@@ -46,6 +46,9 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [pending, setPending] = useState<PendingPayment[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [verifiedAdmin, setVerifiedAdmin] = useState<boolean | null>(null);
+  const canManagePayments = isAdmin || verifiedAdmin === true;
+  const checkingPaymentAccess = isAuthenticated && !!user && !isAdmin && verifiedAdmin === null;
   const pendingCount = pending.length;
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -71,9 +74,28 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) {
+      setVerifiedAdmin(false);
+      return;
+    }
+
+    let cancelled = false;
+    setVerifiedAdmin(null);
+    supabase
+      .rpc("has_role", { _user_id: user.id, _role: "admin" })
+      .then(({ data, error }) => {
+        if (!cancelled) setVerifiedAdmin(!error && data === true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, user?.id]);
+
   // Admin: subscribe to pending payments
   useEffect(() => {
-    if (!isAdmin) {
+    if (!canManagePayments) {
       setPending([]);
       seenPaymentIdsRef.current = new Set();
       initialPaymentLoadRef.current = true;
@@ -128,7 +150,7 @@ export function Navbar() {
       window.clearInterval(interval);
       supabase.removeChannel(channel);
     };
-  }, [isAdmin]);
+  }, [canManagePayments]);
 
   const handleAuthorize = async (p: PendingPayment) => {
     const { error: e1 } = await supabase
@@ -163,7 +185,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-primary">
-      {isAuthenticated && isAdmin && pendingCount > 0 && (
+      {isAuthenticated && canManagePayments && pendingCount > 0 && (
         <div className="border-b border-warning/30 bg-warning px-4 py-2 text-warning-foreground">
           <div className="container flex flex-wrap items-center justify-between gap-2 text-sm">
             <button
@@ -252,24 +274,26 @@ export function Navbar() {
               <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => {
-                    if (isAdmin) {
+                    if (canManagePayments) {
                       setNotifOpen((o) => !o);
+                    } else if (checkingPaymentAccess) {
+                      toast.info("Checking payment notifications...");
                     } else {
                       toast.info("No new notifications");
                     }
                   }}
                   className="relative p-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                  title={isAdmin ? "Pending payments" : "Notifications"}
+                  title={canManagePayments ? "Pending payments" : "Notifications"}
                 >
                   <Bell className="h-5 w-5" />
-                  {isAdmin && pendingCount > 0 && (
+                  {canManagePayments && pendingCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
                       {pendingCount}
                     </span>
                   )}
                 </button>
 
-                {isAdmin && notifOpen && (
+                {canManagePayments && notifOpen && (
                   <div className="absolute right-0 top-full mt-2 w-[min(92vw,420px)] rounded-lg border bg-popover shadow-lg z-50">
                     <div className="flex items-center justify-between border-b px-4 py-3">
                       <div>
@@ -363,7 +387,7 @@ export function Navbar() {
                     </div>
                     <div className="py-1">
                       {[
-                        ...(isAdmin ? [{ to: "/admin", label: `Admin · Payments${pendingCount > 0 ? ` (${pendingCount})` : ""}`, icon: ShieldCheck }] : []),
+                        ...(canManagePayments ? [{ to: "/admin", label: `Admin · Payments${pendingCount > 0 ? ` (${pendingCount})` : ""}`, icon: ShieldCheck }] : []),
                         { to: "/my-learning", label: "My Learning", icon: BookOpen },
                         { to: "/cart", label: "My Cart", icon: ShoppingCart },
                         { to: "/wishlist", label: "Wishlist", icon: Heart },
