@@ -122,14 +122,6 @@ export function Navbar() {
       .channel("nav-pending-payments")
       .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, (payload) => {
         refresh();
-        if (payload.eventType === "INSERT") {
-          const p = payload.new as PendingPayment;
-          toast.info("New payment received", {
-            description: formatPaymentMessage(p),
-            action: { label: "Authorize", onClick: () => setNotifOpen(true) },
-            duration: 12000,
-          });
-        }
       })
       .subscribe();
     return () => {
