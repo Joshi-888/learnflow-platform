@@ -48,23 +48,27 @@ export function Navbar() {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Admin: subscribe to pending payments count
+  // Admin: subscribe to pending payments
   useEffect(() => {
     if (!isAdmin) {
-      setPendingCount(0);
+      setPending([]);
       return;
     }
     const refresh = async () => {
-      const { count } = await supabase
+      const { data } = await supabase
         .from("payments")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pending");
-      setPendingCount(count ?? 0);
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      setPending((data ?? []) as unknown as PendingPayment[]);
     };
     refresh();
     const channel = supabase
@@ -72,17 +76,43 @@ export function Navbar() {
       .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, (payload) => {
         refresh();
         if (payload.eventType === "INSERT") {
-          const p = payload.new as { user_name?: string; user_email?: string; amount?: number };
-          toast.info(`💰 New payment from ${p.user_name || p.user_email} – ₹${Number(p.amount).toLocaleString()}`, {
-            action: { label: "Review", onClick: () => navigate("/admin") },
-          });
+          const p = payload.new as PendingPayment;
+          const titles = (p.items || []).map((i) => i.title).join(", ");
+          toast.info(
+            `💰 ${p.user_name || p.user_email} paid ₹${Number(p.amount).toLocaleString()} for ${titles}`,
+            { action: { label: "Review", onClick: () => setNotifOpen(true) }, duration: 8000 }
+          );
         }
       })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isAdmin, navigate]);
+  }, [isAdmin]);
+
+  const handleAuthorize = async (p: PendingPayment) => {
+    const { error: e1 } = await supabase
+      .from("payments")
+      .update({ status: "authorized", authorized_at: new Date().toISOString() })
+      .eq("id", p.id);
+    if (e1) return toast.error(e1.message);
+    const courseItems = (p.items || []).filter((i) => i.type === "course");
+    if (courseItems.length > 0) {
+      const rows = courseItems.map((i) => ({ user_id: p.user_id, course_id: i.id, payment_id: p.id }));
+      const { error: e2 } = await supabase
+        .from("enrollments")
+        .upsert(rows, { onConflict: "user_id,course_id", ignoreDuplicates: true });
+      if (e2) toast.error(`Enrollment: ${e2.message}`);
+    }
+    toast.success(`Authorized ${p.user_name || p.user_email}`);
+  };
+
+  const handleReject = async (p: PendingPayment) => {
+    const { error } = await supabase.from("payments").update({ status: "rejected" }).eq("id", p.id);
+    if (error) return toast.error(error.message);
+    toast.success("Payment rejected");
+  };
+
 
   const navLinks = [
     { to: "/courses", label: "Courses", icon: BookOpen },
