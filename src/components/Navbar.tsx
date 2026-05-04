@@ -83,9 +83,13 @@ export function Navbar() {
     let cancelled = false;
     setVerifiedAdmin(null);
     supabase
-      .rpc("has_role", { _user_id: user.id, _role: "admin" })
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
       .then(({ data, error }) => {
-        if (!cancelled) setVerifiedAdmin(!error && data === true);
+        if (!cancelled) setVerifiedAdmin(!error && data?.role === "admin");
       });
 
     return () => {
