@@ -48,11 +48,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   init: () => {
     const checkRole = async (userId: string) => {
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "admin",
-      });
-      set({ isAdmin: !error && data === true });
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      set({ isAdmin: !error && data?.role === "admin" });
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
